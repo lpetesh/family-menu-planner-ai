@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#28a745">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Що готую">
+    <title>🍽️ Що готую на тиждень</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        .dish-type-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .dish-type-card:hover {
+            transform: translateY(-2px);
+        }
+        .cooking-plan-item {
+            border-left: 4px solid #28a745;
+            background: #f8f9fa;
+        }
+        .ready-meal-item {
+            border-left: 4px solid #ffc107;
+            background: #fff8e1;
+        }
+        .badge-protein { background-color: #e74c3c !important; }
+        .badge-side { background-color: #f39c12 !important; }
+        .badge-vegetable { background-color: #27ae60 !important; }
+        .badge-dessert { background-color: #8e44ad !important; }
+        .badge-soup { background-color: #3498db !important; }
+        .badge-salad { background-color: #16a085 !important; }
+        .badge-breakfast { background-color: #f1c40f !important; color: #000; }
+
+        /* AI Generator Styles */
+        .ai-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            min-height: 600px;
+        }
+        .ai-chat-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .ai-message {
+            background: rgba(255,255,255,0.15);
+            border-left: 4px solid #ffd700;
+            margin: 10px 0;
+            padding: 12px 16px;
+            border-radius: 10px;
+        }
+        .user-message {
+            background: rgba(255,255,255,0.2);
+            margin: 10px 0;
+            padding: 12px 16px;
+            border-radius: 10px;
+            text-align: right;
+            margin-left: 20%;
+        }
+        .ai-input-container {
+            background: rgba(255,255,255,0.15);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .ai-input {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+        }
+        .ai-input::placeholder {
+            color: rgba(255,255,255,0.8);
+        }
+        .ai-input:focus {
+            outline: none;
+            box-shadow: none;
+            background: transparent;
+            color: white;
+        }
+        .suggestion-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+        .suggestion-btn:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+        .generate-btn {
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            border: none;
+            color: #333;
+            font-weight: 600;
+            border-radius: 20px;
+        }
+        .generated-recipe {
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+            border: 2px solid #28a745;
+            border-radius: 12px;
+        }
+        .badge-ai { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="#">🍽️ Що готую</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link active" href="#planner" onclick="showSection('planner')">📋 Планувальник</a>
+                    <a class="nav-link" href="#dishes" onclick="showSection('dishes')">🍴 Страви</a>
+                    <a class="nav-link" href="#ready" onclick="showSection('ready')">✅ Готові</a>
+                    <a class="nav-link" href="#shopping" onclick="showSection('shopping')">🛒 Покупки</a>
+                    <a class="nav-link" href="#ai-generator" onclick="showSection('ai-generator')">🤖 AI Кухар</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-3">
+        <!-- Головний планувальник -->
+        <div id="planner-section" class="section">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2>📋 План готування на наступні дні</h2>
+                    <p class="text-muted">Плануй страви на вихідні для наступних 3-4 днів</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-outline-success me-2" onclick="generateCookingPlan()">🎲 Автопідбір</button>
+                    <button class="btn btn-success" onclick="showAddPlanModal()">➕ Додати страву</button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div id="cooking-plans-list" class="mb-4"></div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">🎯 Швидкий підбір</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2" id="quick-dish-selection"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Генератор рецептів -->
+        <div id="ai-generator-section" class="section" style="display: none;">
+            <div class="ai-section p-4">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h2>🤖 AI Кухар - Генератор рецептів</h2>
+                        <p class="mb-0">Опиши що хочеш приготувати, і я створю рецепт спеціально для тебе!</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge badge-ai">✨ AI Powered</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
+                        <!-- AI Чат -->
+                        <div class="ai-chat-container p-3 mb-3" id="ai-chat-messages">
+                            <div class="ai-message">
+                                <strong>🤖 AI Кухар:</strong><br>
+                                Привіт! Я допоможу створити ідеальний рецепт. Розкажи що хочеш приготувати або які інгредієнти є вдома?
+                            </div>
+                        </div>
+
+                        <!-- Швидкі пропозиції -->
+                        <div class="mb-3">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="suggestion-btn btn btn-sm" onclick="quickPrompt('Салат на швидку руку')">🥗 Швидкий салат</button>
+                                <button class="suggestion-btn btn btn-sm" onclick="quickPrompt('Суп з того що є')">🍲 Суп з залишків</button>
+                                <button class="suggestion-btn btn btn-sm" onclick="quickPrompt('Страва з курки')">🐔 З курки</button>
+                                <button class="suggestion-btn btn btn-sm" onclick="quickPrompt('Простий десерт')">🍰 Десерт</button>
+                                <button class="suggestion-btn btn btn-sm" onclick="quickPrompt('Вегетаріанське')">🥕 Вегетаріанське</button>
+                                <button class="suggestion-btn btn btn-sm" onclick="quickPrompt('Ідея для сніданку')">🍳 Сніданок</button>
+                            </div>
+                        </div>
+
+                        <!-- Поле вводу -->
+                        <div class="ai-input-container d-flex align-items-center">
+                            <input type="text" class="ai-input form-control" id="ai-prompt-input" placeholder="Опиши що хочеш приготувати..." onkeypress="if(event.key==='Enter') generateRecipe()">
+                            <button class="generate-btn btn ms-2 px-4" onclick="generateRecipe()">
+                                🚀 Згенерувати
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <!-- Згенерований рецепт -->
+                        <div id="generated-recipe-container" class="generated-recipe p-4" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="mb-1" id="recipe-title">🍗 Згенерована страва</h5>
+                                    <div class="d-flex gap-2 mb-2" id="recipe-badges"></div>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted" id="recipe-meta">
+                                        ⏱️ 15 хв підготовка<br>
+                                        🔥 20 хв готування<br>
+                                        👥 4 порції
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6>📝 Інгредієнти:</h6>
+                                <div id="recipe-ingredients"></div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6>👨‍🍳 Приготування:</h6>
+                                <div id="recipe-instructions"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label small">Зберегти як:</label>
+                                        <select class="form-select form-select-sm" id="recipe-category">
+                                            <option value="protein">🥩 Білки (м'ясо, риба)</option>
+                                            <option value="side">🍚 Гарніри</option>
+                                            <option value="vegetable">🥕 Овочі</option>
+                                            <option value="dessert">🍰 Десерти</option>
+                                            <option value="soup">🍲 Супи</option>
+                                            <option value="salad">🥗 Салати</option>
+                                            <option value="breakfast">🍳 Сніданки</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label small">Дії:</label>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-success btn-sm flex-fill" onclick="saveGeneratedRecipe()">
+                                                💾 Зберегти
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-sm" onclick="editRecipe()">
+                                                ✏️ Редагувати
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <button class="btn btn-outline-success btn-sm me-2" onclick="addRecipeToPlanning()">
+                                    ➕ Додати до плану готування
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="generateVariation()">
+                                    🔄 Згенерувати варіацію
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Заглушка -->
+                        <div id="recipe-placeholder" class="text-center text-white">
+                            <div class="py-5">
+                                <h3>✨</h3>
+                                <p class="mb-0">Тут з'явиться твій новий рецепт!</p>
+                                <small>Опиши що хочеш приготувати ліворуч</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Розділ страв з категоріями -->
+        <div id="dishes-section" class="section" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2>🍴 Каталог страв</h2>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="dish-search" placeholder="Пошук страв...">
+                        <button class="btn btn-outline-secondary" onclick="searchDishes()">🔍</button>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-success" onclick="showAddDishModal()">➕ Додати страву</button>
+                </div>
+            </div>
+
+            <div class="row mb-4" id="dish-categories"></div>
+            <div id="dishes-list"></div>
+        </div>
+
+        <!-- Розділ готових страв -->
+        <div id="ready-section" class="section" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2>✅ Що вже готове</h2>
+                    <p class="text-muted">Страви які є в холодильнику і можна їсти</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-success" onclick="showAddReadyMealModal()">➕ Додати готове</button>
+                </div>
+            </div>
+            <div id="ready-meals-list"></div>
+        </div>
+
+        <!-- Розділ покупок -->
+        <div id="shopping-section" class="section" style="display: none;">
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2>🛒 Список покупок</h2>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-outline-primary me-2" onclick="generateShoppingList()">🔄 Згенерувати</button>
+                    <button class="btn btn-success" onclick="showAddShoppingItemModal()">➕ Додати</button>
+                </div>
+            </div>
+            <div id="shopping-list"></div>
+        </div>
+    </div>
+
+    <!-- Модальні вікна -->
+    <!-- Модаль додавання плану готування -->
+    <div class="modal fade" id="addPlanModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">📋 Додати до плану готування</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="plan-form">
+                        <div class="mb-3">
+                            <label class="form-label">Дата готування</label>
+                            <input type="date" class="form-control" name="cooking_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Страва</label>
+                            <select class="form-select" name="dish_id" required>
+                                <option value="">Оберіть страву...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Орієнтовна кількість порцій</label>
+                            <input type="number" class="form-control" name="estimated_servings" value="4">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Нотатки</label>
+                            <textarea class="form-control" name="notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="button" class="btn btn-success" onclick="submitPlan()">Додати</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модаль додавання страви -->
+    <div class="modal fade" id="addDishModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">🍴 Додати нову страву</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="dish-form">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">Назва страви</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Тип страви</label>
+                                    <select class="form-select" name="dish_type" required>
+                                        <option value="protein">🥩 Білки (м'ясо, риба)</option>
+                                        <option value="side">🍚 Гарніри</option>
+                                        <option value="vegetable">🥕 Овочі</option>
+                                        <option value="dessert">🍰 Десерти</option>
+                                        <option value="soup">🍲 Супи</option>
+                                        <option value="salad">🥗 Салати</option>
+                                        <option value="breakfast">🍳 Сніданки</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Інгредієнти (кожен з нового рядка)</label>
+                            <textarea class="form-control" name="ingredients" rows="4"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Спосіб приготування</label>
+                            <textarea class="form-control" name="instructions" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Підготовка (хв)</label>
+                                <input type="number" class="form-control" name="prep_time">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Приготування (хв)</label>
+                                <input type="number" class="form-control" name="cooking_time">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Складність</label>
+                                <select class="form-select" name="difficulty">
+                                    <option value="easy">😌 Легко</option>
+                                    <option value="medium">🤔 Середньо</option>
+                                    <option value="hard">😰 Складно</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="button" class="btn btn-success" onclick="submitDish()">Зберегти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

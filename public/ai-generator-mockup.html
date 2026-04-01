@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI Генератор рецептів - Макет</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .ai-chat-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .chat-messages {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .message {
+            margin: 10px 0;
+            padding: 12px 16px;
+            border-radius: 20px;
+            max-width: 85%;
+        }
+        .message.user {
+            background: rgba(255,255,255,0.2);
+            margin-left: auto;
+            text-align: right;
+        }
+        .message.ai {
+            background: rgba(255,255,255,0.15);
+            border-left: 4px solid #ffd700;
+        }
+        .typing-indicator {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 20px;
+            margin: 10px 0;
+            max-width: 100px;
+        }
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite both;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.16s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.32s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        .recipe-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .recipe-card:hover {
+            transform: translateY(-3px);
+        }
+        .generated-recipe {
+            border: 2px solid #28a745;
+            background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+        }
+        .badge-ai { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .ai-suggestions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+        .suggestion-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+        .suggestion-btn:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .ai-input-container {
+            background: rgba(255,255,255,0.15);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .ai-input {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+        }
+        .ai-input::placeholder {
+            color: rgba(255,255,255,0.8);
+        }
+        .ai-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        .generate-btn {
+            background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+            border: none;
+            color: #333;
+            font-weight: 600;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+        .generate-btn:hover {
+            background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+            transform: translateY(-1px);
+        }
+        .save-recipe-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .save-recipe-btn:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-success mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">🍽️ Що готую + 🤖 AI</a>
+            <div class="nav">
+                <a href="#" class="nav-link text-white">← Назад до додатку</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <!-- AI чат -->
+            <div class="col-lg-6">
+                <div class="ai-chat-container p-4 mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <h4 class="mb-0">🤖 AI Кухар</h4>
+                        <span class="badge badge-ai ms-2">онлайн</span>
+                    </div>
+
+                    <div class="chat-messages p-3 mb-3">
+                        <div class="message ai">
+                            <strong>🤖 AI Кухар:</strong><br>
+                            Привіт! Я допоможу тобі створити нові рецепти. Розкажи що хочеш приготувати або які інгредієнти є вдома?
+                        </div>
+                        
+                        <div class="message user">
+                            Хочу щось смачне з курки на вечерю для 4 осіб
+                        </div>
+
+                        <div class="message ai">
+                            <strong>🤖 AI Кухар:</strong><br>
+                            Чудовий вибір! Ось кілька варіантів:<br><br>
+                            <strong>🍗 Курка в медово-соєвому соусі</strong><br>
+                            • Час приготування: 35 хв<br>
+                            • Складність: легко<br>
+                            • Тип: білки<br><br>
+                            Хочеш повний рецепт? Або розглянемо інші варіанти?
+                        </div>
+
+                        <div class="message user">
+                            Так, давай повний рецепт медово-соєвої курки!
+                        </div>
+
+                        <div class="typing-indicator">
+                            <div class="typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Швидкі пропозиції -->
+                    <div class="ai-suggestions p-3 mb-3">
+                        <small class="text-white-50">Швидкі запити:</small>
+                        <div class="mt-2">
+                            <button class="suggestion-btn btn btn-sm me-2 mb-2">🥗 Салат на швидку руку</button>
+                            <button class="suggestion-btn btn btn-sm me-2 mb-2">🍲 Суп з того що є</button>
+                            <button class="suggestion-btn btn btn-sm me-2 mb-2">🥘 Страва з рису</button>
+                            <button class="suggestion-btn btn btn-sm me-2 mb-2">🍰 Простий десерт</button>
+                            <button class="suggestion-btn btn btn-sm me-2 mb-2">🍳 Ідеї для сніданку</button>
+                            <button class="suggestion-btn btn btn-sm mb-2">🥕 Вегетаріанське</button>
+                        </div>
+                    </div>
+
+                    <!-- Поле вводу -->
+                    <div class="ai-input-container d-flex align-items-center">
+                        <input type="text" class="ai-input form-control" placeholder="Опиши що хочеш приготувати...">
+                        <button class="generate-btn btn ms-2 px-4">
+                            🚀 Згенерувати
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Згенерований рецепт -->
+            <div class="col-lg-6">
+                <div class="recipe-card generated-recipe p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="mb-1">🍗 Курка в медово-соєвому соусі</h5>
+                            <div class="d-flex gap-2 mb-2">
+                                <span class="badge bg-danger">🥩 Білки</span>
+                                <span class="badge bg-warning">😌 Легко</span>
+                                <span class="badge badge-ai">🤖 AI Generated</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">
+                                ⏱️ 15 хв підготовка<br>
+                                🔥 20 хв готування<br>
+                                👥 4 порції
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6>📝 Інгредієнти:</h6>
+                        <ul class="list-unstyled">
+                            <li>• 800г філе курки</li>
+                            <li>• 3 ст.л. соєвого соусу</li>
+                            <li>• 2 ст.л. меду</li>
+                            <li>• 2 зубчики часнику</li>
+                            <li>• 1 ст.л. олії</li>
+                            <li>• 1 ч.л. імбиру тертого</li>
+                            <li>• кунжут для подачі</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6>👨‍🍳 Приготування:</h6>
+                        <ol>
+                            <li>Нарізати курку середніми шматками</li>
+                            <li>Змішати соєвий соус, мед, часник і імбир</li>
+                            <li>Замаринувати курку на 10 хв</li>
+                            <li>Розігріти сковороду з олією</li>
+                            <li>Обсмажити курку 15-20 хв до готовності</li>
+                            <li>Подавати з кунжутом і зеленню</li>
+                        </ol>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label small">Зберегти як:</label>
+                                <select class="form-select form-select-sm">
+                                    <option selected>🥩 Білки (м'ясо, риба)</option>
+                                    <option>🍚 Гарніри</option>
+                                    <option>🥕 Овочі</option>
+                                    <option>🍰 Десерти</option>
+                                    <option>🍲 Супи</option>
+                                    <option>🥗 Салати</option>
+                                    <option>🍳 Сніданки</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="form-label small">Дії:</label>
+                                <div class="d-flex gap-2">
+                                    <button class="save-recipe-btn btn btn-sm flex-fill">
+                                        💾 Зберегти
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm">
+                                        ✏️ Редагувати
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button class="btn btn-outline-success btn-sm me-2">
+                            ➕ Додати до плану готування
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm">
+                            🔄 Згенерувати варіацію
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Історія згенерованих рецептів -->
+                <div class="mt-4">
+                    <h6>📚 Раніше згенеровані:</h6>
+                    
+                    <div class="recipe-card p-3 mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>🥗 Грецький салат з фетою</strong>
+                                <br><small class="text-muted">5 хв тому • Збережено в "Салати"</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary">👁️</button>
+                        </div>
+                    </div>
+
+                    <div class="recipe-card p-3 mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>🍲 Крем-суп з гарбуза</strong>
+                                <br><small class="text-muted">1 год тому • Збережено в "Супи"</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary">👁️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика та налаштування -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="text-success">23</h3>
+                        <small class="text-muted">Згенеровано рецептів</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary">18</h3>
+                        <small class="text-muted">Збережено в каталоз</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="text-warning">12</h3>
+                        <small class="text-muted">Вже приготували</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Демо функціональність
+        document.querySelector('.generate-btn').addEventListener('click', function() {
+            const input = document.querySelector('.ai-input');
+            if (!input.value.trim()) return;
+            
+            // Додаємо повідомлення користувача
+            const messagesContainer = document.querySelector('.chat-messages');
+            messagesContainer.innerHTML += `
+                <div class="message user">
+                    ${input.value}
+                </div>
+            `;
+            
+            // Очищуємо поле
+            input.value = '';
+            
+            // Імітуємо відповідь AI
+            setTimeout(() => {
+                messagesContainer.innerHTML += `
+                    <div class="message ai">
+                        <strong>🤖 AI Кухар:</strong><br>
+                        Генерую рецепт... ✨<br>
+                        Це займе кілька секунд!
+                    </div>
+                `;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 500);
+        });
+
+        // Швидкі пропозиції
+        document.querySelectorAll('.suggestion-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelector('.ai-input').value = this.textContent.replace(/🎯|🥗|🍲|🥘|🍰|🍳|🥕/, '').trim();
+            });
+        });
+
+        // Кнопка збереження
+        document.querySelector('.save-recipe-btn').addEventListener('click', function() {
+            this.innerHTML = '✅ Збережено!';
+            this.classList.remove('save-recipe-btn');
+            this.classList.add('btn-success');
+            
+            setTimeout(() => {
+                this.innerHTML = '💾 Зберегти';
+                this.classList.add('save-recipe-btn');
+                this.classList.remove('btn-success');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
