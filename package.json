@@ -1,24 +1,23 @@
 {
   "name": "family-menu-planner-ai",
   "version": "1.0.0",
-  "description": "Планувальник меню сім'ї з AI генератором рецептів",
+  "description": "Family Menu Planner with AI Recipe Generator",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js",
-    "build": "echo 'Build completed'",
-    "vercel-build": "npm install"
+    "dev": "nodemon server.js",
+    "vercel-build": "echo 'Build complete'"
   },
-  "keywords": ["menu", "recipes", "family", "ai", "cooking", "planner"],
-  "author": "AI Builder Bot",
-  "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
-    "sqlite3": "^5.1.6",
+    "@supabase/supabase-js": "^2.39.0",
     "cors": "^2.8.5",
-    "body-parser": "^1.20.2"
+    "dotenv": "^16.3.1"
   },
   "engines": {
-    "node": ">=16.0.0"
-  }
+    "node": ">=18.0.0"
+  },
+  "keywords": ["menu", "planner", "ai", "recipe", "family"],
+  "author": "lpetesh",
+  "license": "MIT"
 }
